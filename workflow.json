@@ -69,19 +69,19 @@
             {
               "id": "ee5b22ce-fdb8-4505-9421-00908195017a",
               "name": "image1",
-              "value": "=https://image.pollinations.ai/prompt/beautiful_landscape_of_Rishon Lezion?width=800&height=600",
+              "value": "=https://image.pollinations.ai/prompt/beautiful_landscape_of_Berlin?width=800&height=600",
               "type": "string"
             },
             {
               "id": "43eebd09-2277-4a7b-942c-b8f70af591c2",
               "name": "image2",
-              "value": "=https://image.pollinations.ai/prompt/famous_landmark_in_Rishon Lezion?width=800&height=600",
+              "value": "=https://image.pollinations.ai/prompt/famous_landmark_in_Berlin?width=800&height=600",
               "type": "string"
             },
             {
               "id": "14bb254a-e87d-491b-89ab-ebd98fbd4f55",
               "name": "image3",
-              "value": "=https://image.pollinations.ai/prompt/street_view_of_Rishon Lezion?width=800&height=600",
+              "value": "=https://image.pollinations.ai/prompt/street_view_of_Berlin?width=800&height=600",
               "type": "string"
             }
           ]
@@ -100,7 +100,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=You are a travel assistant. Generate information for the following location: Rishon Lezion. You must return a clean JSON object with the following structure: {\n   \"city_name\": \"Name of the city\",\n   \"description\": \"A short and engaging 2-3 sentences introduction to the city.\",\n   \"attractions\": [\n     {\n       \"name\": \"Attraction 1 Name\",\n       \"description\": \"Recommendation and description of attraction 1\",\n       \"latitude\": 41.8902,\n       \"longitude\": 12.4922\n     },\n     {\n       \"name\": \"Attraction 2 Name\",\n       \"description\": \"Recommendation and description of attraction 2\",\n       \"latitude\": 41.8986,\n       \"longitude\": 12.4769\n     },\n     {\n       \"name\": \"Attraction 3 Name\",\n       \"description\": \"Recommendation and description of attraction 3\",\n       \"latitude\": 41.9029,\n       \"longitude\": 12.4534\n     }\n   ]\n } Make sure the coordinates (latitude and longitude) are real and accurate for those attractions so they can be placed on a map later. Only return the JSON object, without any other text.",
+        "text": "=You are a travel assistant. Generate information for the following location: Berlin. You must return a clean JSON object with the following structure: {\n   \"city_name\": \"Name of the city\",\n   \"description\": \"A short and engaging 2-3 sentences introduction to the city.\",\n   \"attractions\": [\n     {\n       \"name\": \"Attraction 1 Name\",\n       \"description\": \"Recommendation and description of attraction 1\",\n       \"latitude\": 41.8902,\n       \"longitude\": 12.4922\n     },\n     {\n       \"name\": \"Attraction 2 Name\",\n       \"description\": \"Recommendation and description of attraction 2\",\n       \"latitude\": 41.8986,\n       \"longitude\": 12.4769\n     },\n     {\n       \"name\": \"Attraction 3 Name\",\n       \"description\": \"Recommendation and description of attraction 3\",\n       \"latitude\": 41.9029,\n       \"longitude\": 12.4534\n     }\n   ]\n } Make sure the coordinates (latitude and longitude) are real and accurate for those attractions so they can be placed on a map later. Only return the JSON object, without any other text.",
         "messages": {
           "messageValues": []
         },
