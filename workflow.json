@@ -1,1 +1,141 @@
-{   "name": "My workflow",   "nodes": [     {       "parameters": {         "rule": {           "interval": [             {               "triggerAtHour": 20             }           ]         }       },       "type": "n8n-nodes-base.scheduleTrigger",       "typeVersion": 1.3,       "position": [         0,         0       ],       "id": "002968e9-cb31-4dee-a35a-ea163fdc6247",       "name": "Schedule Trigger"     },     {       "parameters": {         "documentId": {           "__rl": true,           "value": "1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs",           "mode": "list",           "cachedResultName": "Web",           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit?usp=drivesdk"         },         "sheetName": {           "__rl": true,           "value": "gid=0",           "mode": "list",           "cachedResultName": "גיליון1",           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit#gid=0"         },         "filtersUI": {           "values": [             {               "lookupColumn": "Status"             }           ]         },         "options": {           "returnFirstMatch": false         }       },       "type": "n8n-nodes-base.googleSheets",       "typeVersion": 4.7,       "position": [         208,         0       ],       "id": "c32bc0b0-8ee5-4a89-9651-d28fe5e68177",       "name": "Get row(s) in sheet",       "credentials": {         "googleSheetsOAuth2Api": {           "id": "mfa6RBapdA8WZYek",           "name": "Google Sheets OAuth2 API"         }       }     },     {       "parameters": {         "assignments": {           "assignments": [             {               "id": "ee5b22ce-fdb8-4505-9421-00908195017a",               "name": "image1",               "value": "=https://image.pollinations.ai/prompt/beautiful_landscape_of_{{ $('Get row(s) in sheet').item.json.Location }}?width=800&height=600",               "type": "string"             },             {               "id": "43eebd09-2277-4a7b-942c-b8f70af591c2",               "name": "image2",               "value": "=https://image.pollinations.ai/prompt/famous_landmark_in_{{ $('Get row(s) in sheet').item.json.Location }}?width=800&height=600",               "type": "string"             },             {               "id": "14bb254a-e87d-491b-89ab-ebd98fbd4f55",               "name": "image3",               "value": "=https://image.pollinations.ai/prompt/street_view_of_{{ $('Get row(s) in sheet').item.json.Location }}?width=800&height=600",               "type": "string"             }           ]         },         "options": {}       },       "type": "n8n-nodes-base.set",       "typeVersion": 3.4,       "position": [         416,         0       ],       "id": "32db6f4b-2675-46e4-837a-2f2951b216cb",       "name": "Edit Fields"     },     {       "parameters": {         "promptType": "define",         "text": "=You are a travel assistant. Generate information for the following location: {{ $('Get row(s) in sheet').item.json.Location }}. You must return a clean JSON object with the following structure: {   \"city_name\": \"Name of the city\",   \"description\": \"A short and engaging 2-3 sentences introduction to the city.\",   \"attractions\": [     {       \"name\": \"Attraction 1 Name\",       \"description\": \"Recommendation and description of attraction 1\",       \"latitude\": 41.8902,       \"longitude\": 12.4922     },     {       \"name\": \"Attraction 2 Name\",       \"description\": \"Recommendation and description of attraction 2\",       \"latitude\": 41.8986,       \"longitude\": 12.4769     },     {       \"name\": \"Attraction 3 Name\",       \"description\": \"Recommendation and description of attraction 3\",       \"latitude\": 41.9029,       \"longitude\": 12.4534     }   ] } Make sure the coordinates (latitude and longitude) are real and accurate for those attractions so they can be placed on a map later. Only return the JSON object, without any other text.",         "messages": {           "messageValues": []         },         "batching": {}       },       "type": "@n8n/n8n-nodes-langchain.chainLlm",       "typeVersion": 1.9,       "position": [         624,         0       ],       "id": "4265114a-df68-4454-a9b7-d927c6235493",       "name": "Basic LLM Chain1"     },     {       "parameters": {         "model": "llama-3.3-70b-versatile",         "options": {}       },       "type": "@n8n/n8n-nodes-langchain.lmChatGroq",       "typeVersion": 1,       "position": [         880,         176       ],       "id": "54830ca6-6c5a-42f9-82eb-203d9b7abe02",       "name": "Groq Chat Model1",       "credentials": {         "groqApi": {           "id": "eHZeZEiASvKIY7Gz",           "name": "Groq account"         }       }     },     {       "parameters": {         "jsCode": "// Remove markdown format if the AI added it\nlet rawText = $input.item.json.text.replace(/```json/gi, '').replace(/```/g, '').trim();\n\n// Parse the raw text into a real JSON object\nlet aiData = JSON.parse(rawText);\n\n// Get the 3 images from the 'Edit Fields' node\nlet img1 = $('Edit Fields').item.json.image1;\nlet img2 = $('Edit Fields').item.json.image2;\nlet img3 = $('Edit Fields').item.json.image3;\n\n// Build the HTML page design\nlet htmlPage = `\n<div style=\"direction: ltr; font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f9; max-width: 800px; margin: auto; border-radius: 10px;\">\n    \n    <h1 style=\"color: #2c3e50; text-align: center;\">Welcome to ${aiData.city_name}</h1>\n    <p style=\"text-align: center; font-size: 16px; color: #555;\">${aiData.description}</p>\n\n    <div style=\"display: flex; justify-content: space-between; margin-top: 20px;\">\n        <img src=\"${img1}\" alt=\"City View 1\" style=\"width: 32%; border-radius: 8px;\">\n        <img src=\"${img2}\" alt=\"City View 2\" style=\"width: 32%; border-radius: 8px;\">\n        <img src=\"${img3}\" alt=\"City View 3\" style=\"width: 32%; border-radius: 8px;\">\n    </div>\n\n    <h2 style=\"color: #34495e; margin-top: 30px;\">Top 3 Attractions</h2>\n    <ul style=\"line-height: 1.6;\">\n        <li><b>${aiData.attractions[0].name}</b>: ${aiData.attractions[0].description}</li>\n        <li><b>${aiData.attractions[1].name}</b>: ${aiData.attractions[1].description}</li>\n        <li><b>${aiData.attractions[2].name}</b>: ${aiData.attractions[2].description}</li>\n    </ul>\n\n    <div style=\"text-align: center; margin-top: 40px; margin-bottom: 20px;\">\n        <a href=\"https://www.google.com/maps/dir/${aiData.attractions[0].latitude},${aiData.attractions[0].longitude}/${aiData.attractions[1].latitude},${aiData.attractions[1].longitude}/${aiData.attractions[2].latitude},${aiData.attractions[2].longitude}\" \n           target=\"_blank\" \n           style=\"background-color: #3498db; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;\">\n           Show Attractions on Map\n        </a>\n    </div>\n\n</div>\n`;\n\n// Return the final HTML string to use in the next steps\nreturn {\n  json: {\n    finalHtml: htmlPage\n  }\n};"       },       "type": "n8n-nodes-base.code",       "typeVersion": 2,       "position": [         976,         0       ],       "id": "c206f1f2-7b58-4e3a-8272-bac65c6a9514",       "name": "Code in JavaScript"     },     {       "parameters": {         "operation": "sendAndWait",         "sendTo": "netanel3mic@gmail.com",         "subject": "Travel Page Approval",         "message": "={{ $json.finalHtml }}",         "approvalOptions": {           "values": {             "approvalType": "double"           }         },         "options": {}       },       "type": "n8n-nodes-base.gmail",       "typeVersion": 2.2,       "position": [         1184,         0       ],       "id": "eb8e067b-b37c-46f3-9041-39e3aebbb9fe",       "name": "Send message and wait for response",       "webhookId": "03676d38-8eaf-4f22-95f7-4d883e861cb1",       "credentials": {         "gmailOAuth2": {           "id": "lgIF27kr0mgjmeBJ",           "name": "Gmail OAuth2 API"         }       }     },     {       "parameters": {         "conditions": {           "options": {             "caseSensitive": true,             "leftValue": "",             "typeValidation": "strict",             "version": 3           },           "conditions": [             {               "id": "9c981c27-434f-40dd-b834-4bf1e57b8946",               "leftValue": "={{ $json.data.approved }}",               "rightValue": "",               "operator": {                 "type": "boolean",                 "operation": "true",                 "singleValue": true               }             }           ],           "combinator": "and"         },         "options": {}       },       "type": "n8n-nodes-base.if",       "typeVersion": 2.3,       "position": [         1392,         0       ],       "id": "5451c3fb-3a1b-412c-8742-2a1ce165a8ec",       "name": "If"     },     {       "parameters": {         "operation": "update",         "documentId": {           "__rl": true,           "value": "1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs",           "mode": "list",           "cachedResultName": "Web",           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit?usp=drivesdk"         },         "sheetName": {           "__rl": true,           "value": "gid=0",           "mode": "list",           "cachedResultName": "גיליון1",           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit#gid=0"         },         "columns": {           "mappingMode": "defineBelow",           "value": {             "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",             "Status": "Decline",             "Final_URL": "="           },           "matchingColumns": [             "row_number"           ],           "schema": [             {               "id": "Location",               "displayName": "Location",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "Status",               "displayName": "Status",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "Feedback",               "displayName": "Feedback",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "Final_URL",               "displayName": "Final_URL",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "row_number",               "displayName": "row_number",               "required": false,               "defaultMatch": false,               "display": true,               "type": "number",               "canBeUsedToMatch": true,               "readOnly": true,               "removed": false             }           ],           "attemptToConvertTypes": false,           "convertFieldsToString": false         },         "options": {}       },       "type": "n8n-nodes-base.googleSheets",       "typeVersion": 4.7,       "position": [         1584,         176       ],       "id": "f31378b1-dcfa-4b81-90e1-188257badbf9",       "name": "Update row in sheet1",       "credentials": {         "googleSheetsOAuth2Api": {           "id": "mfa6RBapdA8WZYek",           "name": "Google Sheets OAuth2 API"         }       }     },     {       "parameters": {         "operation": "createFromText",         "content": "={{ $('Code in JavaScript').item.json.finalHtml }}",         "name": "Rome_Travel_Page.html",         "driveId": {           "__rl": true,           "mode": "list",           "value": "My Drive"         },         "folderId": {           "__rl": true,           "mode": "list",           "value": "root",           "cachedResultName": "/ (Root folder)"         },         "options": {}       },       "type": "n8n-nodes-base.googleDrive",       "typeVersion": 3,       "position": [         1792,         96       ],       "id": "a5ec0f1f-d52c-4abe-81e6-bb85c5233eec",       "name": "Create file from text",       "credentials": {         "googleDriveOAuth2Api": {           "id": "iYG0uwspxDqtCph3",           "name": "Google Drive OAuth2 API"         }       }     },     {       "parameters": {         "operation": "update",         "documentId": {           "__rl": true,           "value": "1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs",           "mode": "list",           "cachedResultName": "Web",           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit?usp=drivesdk"         },         "sheetName": {           "__rl": true,           "value": "gid=0",           "mode": "list",           "cachedResultName": "גיליון1",           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit#gid=0"         },         "columns": {           "mappingMode": "defineBelow",           "value": {             "row_number": "={{ $('Get row(s) in sheet').item.json.row_number }}",             "Status": "Approved",             "Final_URL": "={{ \"[https://drive.google.com/file/d/](https://drive.google.com/file/d/)\" + $json.id + \"/view\" }}"           },           "matchingColumns": [             "row_number"           ],           "schema": [             {               "id": "Location",               "displayName": "Location",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "Status",               "displayName": "Status",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "Feedback",               "displayName": "Feedback",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "Final_URL",               "displayName": "Final_URL",               "required": false,               "defaultMatch": false,               "display": true,               "type": "string",               "canBeUsedToMatch": true             },             {               "id": "row_number",               "displayName": "row_number",               "required": false,               "defaultMatch": false,               "display": true,               "type": "number",               "canBeUsedToMatch": true,               "readOnly": true,               "removed": false             }           ],           "attemptToConvertTypes": false,           "convertFieldsToString": false         },         "options": {}       },       "type": "n8n-nodes-base.googleSheets",       "typeVersion": 4.7,       "position": [         1600,         0       ],       "id": "ff996e45-baa8-41ff-b369-951b22a5fdc0",       "name": "Update row in sheet",       "credentials": {         "googleSheetsOAuth2Api": {           "id": "mfa6RBapdA8WZYek",           "name": "Google Sheets OAuth2 API"         }       }     },     {       "parameters": {         "authentication": "oAuth2",         "resource": "file",         "owner": {           "__rl": true,           "mode": "list",           "value": ""         },         "repository": {           "__rl": true,           "mode": "list",           "value": ""         }       },       "type": "n8n-nodes-base.github",       "typeVersion": 1.1,       "position": [         2000,         96       ],       "id": "9371494b-6d87-4faa-afc9-062aa4625daa",       "name": "Create a file",       "webhookId": "2a405b75-6756-41f4-8f24-903a0c674144",       "credentials": {         "githubOAuth2Api": {           "id": "GznaGBZWmKa3NTbG",           "name": "GitHub OAuth2 API"         }       }     }   ],   "pinData": {},   "connections": {     "Schedule Trigger": {       "main": [         [           {             "node": "Get row(s) in sheet",             "type": "main",             "index": 0           }         ]       ]     },     "Get row(s) in sheet": {       "main": [         [           {             "node": "Edit Fields",             "type": "main",             "index": 0           }         ]       ]     },     "Edit Fields": {       "main": [         [           {             "node": "Basic LLM Chain1",             "type": "main",             "index": 0           }         ]       ]     },     "Groq Chat Model1": {       "ai_languageModel": [         [           {             "node": "Basic LLM Chain1",             "type": "ai_languageModel",             "index": 0           }         ]       ]     },     "Basic LLM Chain1": {       "main": [         [           {             "node": "Code in JavaScript",             "type": "main",             "index": 0           }         ]       ]     },     "Code in JavaScript": {       "main": [         [           {             "node": "Send message and wait for response",             "type": "main",             "index": 0           }         ]       ]     },     "Send message and wait for response": {       "main": [         [           {             "node": "If",             "type": "main",             "index": 0           }         ]       ]     },     "If": {       "main": [         [           {             "node": "Update row in sheet",             "type": "main",             "index": 0           }         ],         [           {             "node": "Update row in sheet1",             "type": "main",             "index": 0           }         ]       ]     },     "Update row in sheet": {       "main": [         [           {             "node": "Create file from text",             "type": "main",             "index": 0           }         ]       ]     },     "Create file from text": {       "main": [         [           {             "node": "Create a file",             "type": "main",             "index": 0           }         ]       ]     }   },   "active": false,   "settings": {     "executionOrder": "v1",     "binaryMode": "separate"   },   "versionId": "62c0d11b-ff3b-4bb1-aa72-f9052b1f5c4a",   "meta": {     "templateCredsSetupCompleted": true,     "instanceId": "e1f399f9ab5f3e3835af1cc122929817946a2f1f5429c619a367a1ea4e7b0db5"   },   "nodeGroups": [],   "id": "byXr2fDQiF2TZGx8",   "tags": [] }
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 20
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "002968e9-cb31-4dee-a35a-ea163fdc6247",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs",
+          "mode": "list",
+          "cachedResultName": "Web",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "גיליון1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1CUdINzOKXXQUK2OV_Slm1y3RxZUY8r0E5CtggWM4uIs/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status"
+            }
+          ]
+        },
+        "options": {
+          "returnFirstMatch": false
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c32bc0b0-8ee5-4a89-9651-d28fe5e68177",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "mfa6RBapdA8WZYek",
+          "name": "Google Sheets OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ee5b22ce-fdb8-4505-9421-00908195017a",
+              "name": "image1",
+              "value": "=https://image.pollinations.ai/prompt/beautiful_landscape_of_London?width=800&height=600",
+              "type": "string"
+            },
+            {
+              "id": "43eebd09-2277-4a7b-942c-b8f70af591c2",
+              "name": "image2",
+              "value": "=https://image.pollinations.ai/prompt/famous_landmark_in_London?width=800&height=600",
+              "type": "string"
+            },
+            {
+              "id": "14bb254a-e87d-491b-89ab-ebd98fbd4f55",
+              "name": "image3",
+              "value": "=https://image.pollinations.ai/prompt/street_view_of_London?width=800&height=600",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "32db6f4b-2675-46e4-837a-2f2951b216cb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a travel assistant. Generate information for the following location: London. You must return a clean JSON object with the following structure: {\n   \"city_name\": \"Name of the city\",\n   \"description\": \"A short and engaging 2-3 sentences introduction to the city.\",\n   \"attractions\": [\n     {\n       \"name\": \"Attraction 1 Name\",\n       \"description\": \"Recommendation and description of attraction 1\",\n       \"latitude\": 41.8902,\n       \"longitude\": 12.4922\n     },\n     {\n       \"name\": \"Attraction 2 Name\",\n       \"description\": \"Recommendation and description of attraction 2\",\n       \"latitude\": 41.8986,\n       \"longitude\": 12.4769\n     },\n     {\n       \"name\": \"Attraction 3 Name\",\n       \"description\": \"Recommendation and description of attraction 3\",\n       \"latitude\": 41.9029,\n       \"longitude\": 12.4534\n     }\n   ]\n } Make sure the coordinates (latitude and longitude) are real and accurate for those attractions so they can be placed on a map later. Only return the JSON object, without any other text.",
+        "messages": {
+          "messageValues": []
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        624,
+        0
+      ],
+      "id": "4265114a-df68-4454-a9b7-d927c6235493",
+      "name": "Basic LLM Chain1"
+    },
+    {
+      "parameters": {
+        "model": "llama-3.3-70b-versatile",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        880,
+        176
+      ],
+      "id": "54830ca6-6c5a-42f9-82eb-203d9b7abe02",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "eHZeZEiASvKIY7Gz",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Remove markdown format if the AI added it\nlet rawText = $input.item.json.text.replace(/
+http://googleusercontent.com/immersive_entry_chip/0
